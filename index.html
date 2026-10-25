@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Pink Club · Yiyi Pash</title>
+  <meta name="description" content="Consulta tus puntos del Pink Club de Yiyi Pash.">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="pink.css">
+</head>
+<body>
+<header class="hero">
+  <div class="logo">yiyi pash</div>
+  <h1>Pink Club 💗</h1>
+  <p>Cada compra suma puntos que cambias por joyería.</p>
+</header>
+
+<main>
+  <section class="card">
+    <h2>Consulta tus puntos</h2>
+    <label>Tu ID de miembro
+      <input type="text" id="id" placeholder="Ej. LUI-0001" maxlength="8" autocapitalize="characters" autocomplete="off">
+    </label>
+    <label>Tu fecha de nacimiento
+      <input type="date" id="fn">
+    </label>
+    <button class="btn" id="btn" onclick="consultar()">Ver mis puntos</button>
+    <div id="res"></div>
+  </section>
+
+  <section class="card">
+    <h2>¿Cómo funciona?</h2>
+    <ol class="pasos">
+      <li>Regístrate gratis en el estudio o con nuestro QR.</li>
+      <li>Por cada $10 de compra ganas 1 punto. Cada punto vale $1 en joyería.</li>
+      <li>Al llegar a $500 en compras, tu membresía Pink se activa y puedes canjear.</li>
+      <li>En tu mes de cumpleaños te regalamos una pieza 🎁</li>
+    </ol>
+    <a class="btn sec" href="registro.html">Regístrate gratis</a>
+  </section>
+</main>
+
+<footer>
+  <a href="terminos.html">Términos</a> ·
+  <a href="aviso.html">Aviso de privacidad</a> ·
+  <a id="derechos" href="#">Mis datos personales</a>
+</footer>
+
+<script>
+const AS_URL='https://script.google.com/macros/s/AKfycbwJhAO5anQhZ_tzZ7f6jSE133AxFzSLU2rXkVH1vdtH9SlkMlbnvdjbez3786HIEhAf/exec';
+const fmt=n=>Number(n||0).toLocaleString('es-MX');
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+document.getElementById('derechos').href='mailto:yiyi.pash@gmail.com?subject='+encodeURIComponent('Solicitud sobre mis datos (Pink Club)')+
+  '&body='+encodeURIComponent('Nombre:\nID de miembro:\nQuiero (consultar / corregir / borrar / oponerme al uso de) mis datos:\nDetalle:\n');
+document.getElementById('id').addEventListener('keydown',e=>{if(e.key==='Enter')consultar();});
+
+async function consultar(){
+  const id=document.getElementById('id').value.trim().toUpperCase();
+  const fn=document.getElementById('fn').value;
+  const res=document.getElementById('res'),btn=document.getElementById('btn');
+  if(!/^[A-Z]{3}-\d{4}$/.test(id))return res.innerHTML='<p class="msg err">Escribe tu ID completo, por ejemplo LUI-0001.</p>';
+  if(!fn)return res.innerHTML='<p class="msg err">Escribe tu fecha de nacimiento.</p>';
+  btn.disabled=true;btn.textContent='Consultando...';res.innerHTML='';
+  try{
+    const r=await fetch(AS_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'pink_saldo',id,fecha_nacimiento:fn}),redirect:'follow'});
+    const j=await r.json();
+    if(!j.ok)throw new Error(j.error||'No se pudo consultar');
+    const d=j.data;
+    if(d.sin_cuenta){res.innerHTML=`<div class="res"><div class="hola">Hola ${esc(d.nombre)} 💗</div><p>${esc(d.mensaje)}</p></div>`;return;}
+    let txt='';
+    if(d.estado==='Activa')txt='Tu membresía está activa: puedes canjear tus puntos en joyería.'+(d.vence?` Tus puntos vencen el <b>${esc(d.vence)}</b> si no compras ni canjeas antes.`:'');
+    else if(d.estado==='Registrada')txt=`Te faltan <b>$${fmt(d.falta_activar)}</b> en compras para activar tu membresía y canjear tus puntos.`;
+    else txt='Tu cuenta está dada de baja.';
+    res.innerHTML=`<div class="res"><div class="hola">Hola ${esc(d.nombre)} 💗</div>
+      <div class="pts">${fmt(d.puntos)} <small>pts</small></div>
+      <span class="estado ${esc(d.estado)}">${d.estado==='Activa'?'Pink activa':esc(d.estado)}</span>
+      <p>${txt}</p></div>`;
+  }catch(e){res.innerHTML=`<p class="msg err">${esc(e.message)}</p>`;}
+  finally{btn.disabled=false;btn.textContent='Ver mis puntos';}
+}
+</script>
+</body>
+</html>
