@@ -165,7 +165,7 @@ nav.tabs [role="tab"][aria-selected="true"]{background:var(--fr-fondo);color:#ff
   </article>
   <dl class="card">
     <div class="fila"><dt class="lab">Regalo de cumpleaños</dt><dd class="val" id="cumple1"></dd></div>
-    <div class="fila"><dt class="lab">Tus puntos</dt><dd class="val">No vencen mientras nos visites cada 6 meses</dd><dd class="det" id="vence"></dd></div>
+    <div class="fila"><dt class="lab">Tus puntos</dt><dd class="val">Duran 12 meses si nos visitas al menos cada 6</dd><dd class="det" id="vence"></dd></div>
   </dl>
   <h2 class="sub">Tus compras</h2>
   <ul class="card lista" id="movs"></ul>
@@ -183,7 +183,7 @@ nav.tabs [role="tab"][aria-selected="true"]{background:var(--fr-fondo);color:#ff
     <li class="ben"><div class="val">Gana con cada compra</div><div class="det" id="b-ppp">1 punto por cada $10</div></li>
     <li class="ben"><div class="val">Úsalos en joyería</div><div class="det" id="b-min">Cada punto vale $1, desde 50 puntos</div></li>
     <li class="ben"><div class="val">Un regalo en tu cumpleaños</div><div class="det">Una pieza PAQ durante tu mes</div></li>
-    <li class="ben"><div class="val">Tus puntos te esperan</div><div class="det">No vencen si nos visitas cada 6 meses</div></li>
+    <li class="ben"><div class="val">Tus puntos te esperan</div><div class="det">Duran 12 meses; visítanos al menos cada 6</div></li>
   </ul>
   <div class="legal"><a href="terminos.html">Términos y condiciones</a></div>
 </section>
@@ -286,6 +286,8 @@ function salir(){mem.del('ypc_llave');mem.del('ypc_entrada');location.reload();}
 $('b-salir').onclick=salir;
 
 // ── Pintar ──────────────────────────────────────────────
+// Cómo se presenta la clienta en los WhatsApp que manda desde la app: apodo (ID)
+function quien(){const p=D.persona;return (p.apodo||p.nombre.split(/\s+/)[0])+' ('+p.id+')';}
 function waLink(texto){return 'https://wa.me/'+D.estudio.codigo_pais+D.estudio.whatsapp+'?text='+encodeURIComponent(texto);}
 function pintar(){
   if(D.sin_cuenta){
@@ -305,19 +307,19 @@ function pintar(){
   const cumpleTxt=p.cumple?p.cumple.dia+' de '+MESES[p.cumple.mes-1]:'';
   $('cumple1').innerHTML=p.cumple?'En '+MESES[p.cumple.mes-1]:'<button class="enlace" type="button" onclick="pedirFecha()">Agrega tu fecha de nacimiento</button>';
   $('cumple2').innerHTML=p.cumple?esc(cumpleTxt):'<button class="enlace" type="button" onclick="pedirFecha()">Agregar</button>';
-  $('vence').textContent=c.vence?'Si no nos visitas antes del '+fecha(c.vence)+', vencen.':'';
+  $('vence').textContent=!c.vence?'':(c.vence_tipo==='antiguedad'?fmt(c.vence_pts)+' puntos cumplen 12 meses y vencen el '+fecha(c.vence)+'. Úsalos antes.':'Si no nos visitas antes del '+fecha(c.vence)+', vencen.');
   $('vence').hidden=!c.vence;
   $('d-wa').innerHTML='<span aria-hidden="true">•••• •••• </span><span class="sr">termina en </span>'+esc(p.wa4);
   $('d-email').textContent=p.email||'Sin correo';
   $('d-mkt').textContent=p.marketing?'Sí':'No';
-  $('b-corregir').href=waLink('Hola, soy '+p.id+' y quiero corregir un dato de mi Pink Club.');
+  $('b-corregir').href=waLink('Hola, soy '+quien()+' y quiero corregir un dato de mi Pink Club.');
   $('b-ppp').textContent='1 punto por cada $'+D.estudio.pesos_por_punto;
   $('b-min').textContent='Cada punto vale $1, desde '+D.estudio.minimo_canje+' puntos';
   $('nota-lanz').hidden=new Date().toISOString().slice(0,10)>=LANZAMIENTO;
   pintarMovs();pintarExp();
 }
 function pintarMovs(){
-  const nombres={Acumula:'Compra',Canje:'Canje de puntos','Cumpleaños':'Regalo de cumpleaños',Ajuste:'Puntos del estudio',Vencimiento:'Puntos vencidos',Baja:'Baja'};
+  const nombres={Acumula:'Compra',Canje:'Canje de puntos','Cumpleaños':'Regalo de cumpleaños',Ajuste:'Puntos del estudio',Vence:'Puntos vencidos',Vencimiento:'Puntos vencidos',Baja:'Baja'};
   const L=D.movimientos||[];
   $('movs').innerHTML=L.length?L.map(m=>{
     const tit=m.tipo==='Acumula'&&!m.puntos&&m.monto?'Compra':(nombres[m.tipo]||m.tipo);
@@ -338,7 +340,7 @@ function pintarExp(){
   if(!E){
     $('exp').innerHTML='<div class="tranqui"><div class="val" style="font-size:16px">Tu expediente está protegido</div>'+
       '<p class="det">Para verlo, abre el link personal que te mandamos por WhatsApp.</p></div>'+
-      '<a class="btn sec" target="_blank" rel="noopener" href="'+esc(waLink('Hola, soy '+p.id+'. ¿Me mandan mi link personal del Pink Club?'))+'">Pedir mi link por WhatsApp</a>';
+      '<a class="btn sec" target="_blank" rel="noopener" href="'+esc(waLink('Hola, soy '+quien()+'. ¿Me mandan mi link personal del Pink Club?'))+'">Pedir mi link por WhatsApp</a>';
     return;
   }
   let h='';
@@ -352,7 +354,7 @@ function pintarExp(){
   if(E.tatuajes.length)h+='<h2 class="sub">Mis tatuajes</h2><ul class="card lista">'+E.tatuajes.map(item).join('')+'</ul>';
   if(E.manual)h+='<a class="btn" target="_blank" rel="noopener" href="'+esc(E.manual)+'">Mi manual de cuidados</a>';
   if(E.tatuajes.length&&E.manual_tatuaje)h+='<a class="btn sec" style="margin-top:10px" target="_blank" rel="noopener" href="'+esc(E.manual_tatuaje)+'">Cuidados de mi tatuaje</a>';
-  h+='<p class="nota"><a class="link" target="_blank" rel="noopener" href="'+esc(waLink('Hola, soy '+p.id+' y tengo una duda sobre mis cuidados.'))+'">¿Dudas? Escríbenos</a></p>';
+  h+='<p class="nota"><a class="link" target="_blank" rel="noopener" href="'+esc(waLink('Hola, soy '+quien()+' y tengo una duda sobre mis cuidados.'))+'">¿Dudas? Escríbenos</a></p>';
   if(E.visitas.length)h+='<h2 class="sub">Mis visitas</h2><div class="card"><ol class="tl" reversed>'+E.visitas.map(v=>
     '<li><div class="val">'+esc(fecha(v.fecha))+' · '+esc(v.tipo)+'</div>'+((v.lugar||v.atendio)?'<div class="det">'+esc([v.lugar,v.atendio?'con '+v.atendio:''].filter(Boolean).join(' · '))+'</div>':'')+'</li>').join('')+'</ol></div>';
   $('exp').innerHTML=h;
