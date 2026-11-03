@@ -36,6 +36,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
 .titulo{font-family:var(--t);font-weight:500;font-size:22px;letter-spacing:.14em;text-transform:uppercase;color:var(--fr-texto);margin:18px 2px 14px}
 .sub{font-family:var(--t);font-weight:700;font-size:14px;letter-spacing:.02em;color:var(--fr-texto);margin:24px 4px 8px}
 .pill{display:inline-block;background:#fff;color:var(--fr-texto);font-family:var(--t);font-weight:700;font-size:12px;letter-spacing:.06em;text-transform:uppercase;border-radius:999px;padding:4px 14px}
+.pill.fund{background:transparent;color:#fff;border:1.5px solid #fff;margin-left:4px}
 
 /* Credencial (como la tarjeta "Visión" del manual) */
 .cred{background:var(--fr-fondo);color:#fff;border-radius:64px 24px 24px 24px;padding:22px 22px 20px;margin-bottom:14px;position:relative;overflow:hidden}
@@ -154,7 +155,7 @@ nav.tabs [role="tab"][aria-selected="true"]{background:var(--fr-fondo);color:#ff
 <section role="tabpanel" id="panel-puntos" aria-labelledby="tab-puntos">
   <h1 class="sr" tabindex="-1">Mis puntos</h1>
   <article class="cred" style="margin-top:12px" aria-label="Tu tarjeta Pink Club">
-    <span class="pill">Pink Club</span>
+    <span class="pill">Pink Club</span> <span class="pill fund" hidden>Fundadora</span>
     <p class="num"><span id="saldo">0</span><small>puntos</small></p>
     <p class="eq">Cada punto vale $1 en joyería</p>
     <dl class="pie">
@@ -190,7 +191,7 @@ nav.tabs [role="tab"][aria-selected="true"]{background:var(--fr-fondo);color:#ff
 <section role="tabpanel" id="panel-datos" aria-labelledby="tab-datos" hidden>
   <h1 class="titulo" tabindex="-1">Mis datos</h1>
   <article class="cred grande" aria-label="Tu credencial">
-    <span class="pill">Pink Club</span>
+    <span class="pill">Pink Club</span> <span class="pill fund" hidden>Fundadora</span>
     <dl style="margin-top:20px"><dt>ID de miembro</dt><dd class="id" id="id2"></dd></dl>
     <p class="v" style="margin-top:6px" id="nombre2"></p>
   </article>
@@ -249,7 +250,7 @@ function vista(v){['v-cargando','v-entrada','v-app','tabs'].forEach(id=>$(id).hi
 
 // ── Entrar ──────────────────────────────────────────────
 async function iniciar(){
-  // Liga personal: yiyipash.github.io/pink/#llave=… → se guarda y se quita de la barra de direcciones
+  // Liga personal: yiyipash.com/pink/#llave=… → se guarda y se quita de la barra de direcciones
   const m=location.hash.match(/llave=([a-f0-9]{32})/);
   if(m){mem.set('ypc_llave',m[1]);history.replaceState(null,'',location.pathname+location.search);}
   const llave=mem.get('ypc_llave');
@@ -296,6 +297,7 @@ function pintar(){
   const partes=p.nombre.split(/\s+/);
   $('hola').textContent='Hola, '+p.apodo;
   $('saldo').textContent=fmt(c.saldo);
+  document.querySelectorAll('.pill.fund').forEach(x=>x.hidden=!c.fundadora);
   // Nombre + primer apellido: "Luis Enrique López Pacheco" → "Luis López"; "Laura Romero Retama" → "Laura Romero"
   $('miembro').textContent=partes.length>=4?partes[0]+' '+partes[partes.length-2]:partes.slice(0,2).join(' ');
   $('id1').textContent=$('id2').textContent=p.id;
