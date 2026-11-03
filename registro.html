@@ -44,7 +44,7 @@
     <p style="font-size:14px;color:var(--mu)">Tu ID de miembro es:</p>
     <div class="id-grande" id="ok-id"></div>
     <p style="font-size:13px" id="ok-txt"></p>
-    <a class="btn sec" href="./" style="margin-top:14px">Consultar mis puntos</a>
+    <a class="btn sec" href="./" style="margin-top:14px">Entrar a mi Pink Club</a>
   </section>
 </main>
 
@@ -105,10 +105,11 @@ async function registrar(){
     const r=await post(datos);
     $('form-card').style.display='none';$('ok-card').style.display='block';
     $('ok-id').textContent=r.id_clienta;
+    // Persona nueva: el servidor regresa su llave y entra directo a la app en este celular
+    if(r.llave){try{localStorage.setItem('ypc_llave',r.llave);}catch(_){}}
     $('ok-txt').innerHTML=(r.duplicada?'Ya estabas registrada con este ID. ':'')+
       (e<12?`Tus compras suman en la cuenta de tu tutor (<b>${tutorId}</b>). `:'')+
-      'Toma captura de pantalla: con tu ID y tu fecha de nacimiento consultas tus puntos.'+
-      (e<12?'':' También te lo mandaremos por WhatsApp.');
+      'Entra a tu Pink Club con el botón de abajo. También te mandaremos por WhatsApp tu liga personal.';
     window.scrollTo(0,0);
   }catch(x){err.textContent=x.message;}
   finally{btn.disabled=false;btn.textContent='Registrarme 💗';}
