@@ -335,8 +335,8 @@ function pintarExp(){
   const E=D.expediente,p=D.persona;
   if(!E){
     $('exp').innerHTML='<div class="tranqui"><div class="val" style="font-size:16px">Tu expediente está protegido</div>'+
-      '<p class="det">Para verlo, abre la liga personal que te mandamos por WhatsApp.</p></div>'+
-      '<a class="btn sec" target="_blank" rel="noopener" href="'+esc(waLink('Hola, soy '+p.id+'. ¿Me mandan mi liga personal del Pink Club?'))+'">Pedir mi liga por WhatsApp</a>';
+      '<p class="det">Para verlo, abre el link personal que te mandamos por WhatsApp.</p></div>'+
+      '<a class="btn sec" target="_blank" rel="noopener" href="'+esc(waLink('Hola, soy '+p.id+'. ¿Me mandan mi link personal del Pink Club?'))+'">Pedir mi link por WhatsApp</a>';
     return;
   }
   let h='';
@@ -356,10 +356,10 @@ function pintarExp(){
   $('exp').innerHTML=h;
 }
 
-// ── Fecha de nacimiento (solo con liga personal) ───────
+// ── Fecha de nacimiento (solo con link personal) ───────
 function pedirFecha(){
   ir('datos');
-  if(!acceso||!acceso.llave){$('cumple2').textContent='Ábrela con tu liga personal para agregarla';return;}
+  if(!acceso||!acceso.llave){$('cumple2').textContent='Entra con tu link personal para agregarla';return;}
   $('f-fecha').hidden=false;$('cumple2').hidden=true;$('fn2').focus();
 }
 $('b-fecha').onclick=async()=>{

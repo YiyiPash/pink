@@ -109,7 +109,7 @@ async function registrar(){
     if(r.llave){try{localStorage.setItem('ypc_llave',r.llave);}catch(_){}}
     $('ok-txt').innerHTML=(r.duplicada?'Ya estabas registrada con este ID. ':'')+
       (e<12?`Tus compras suman en la cuenta de tu tutor (<b>${tutorId}</b>). `:'')+
-      'Entra a tu Pink Club con el botón de abajo. También te mandaremos por WhatsApp tu liga personal.';
+      'Entra a tu Pink Club con el botón de abajo. También te mandaremos por WhatsApp tu link personal.';
     window.scrollTo(0,0);
   }catch(x){err.textContent=x.message;}
   finally{btn.disabled=false;btn.textContent='Registrarme 💗';}
