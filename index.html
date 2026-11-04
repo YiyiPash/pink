@@ -170,6 +170,18 @@ nav.tabs [role="tab"][aria-selected="true"]{background:var(--fr-fondo);color:#ff
   <p class="nota"><button class="enlace" type="button" onclick="salir()">Entrar de otra forma</button></p>
 </main>
 
+<!-- ═════ ACEPTAR AVISO (cuenta abierta por invitación) ═════ -->
+<main id="v-aviso" class="entrada" hidden>
+  <h1 class="titulo" tabindex="-1" id="t-aviso">Antes de entrar</h1>
+  <p class="lema" id="aviso-lema"></p>
+  <form class="form" id="f-aviso" novalidate>
+    <label class="permiso"><input id="ok-aviso" type="checkbox"> <span>Acepto el <a class="link" href="aviso.html" target="_blank">aviso de privacidad</a> y los <a class="link" href="terminos.html" target="_blank">términos del Pink Club</a>.</span></label>
+    <button class="btn" id="b-aviso" type="submit">Entrar</button>
+    <p class="err" id="e-aviso" role="alert"></p>
+  </form>
+  <p class="nota">Solo te lo pedimos una vez.</p>
+</main>
+
 <!-- ═════ APP ═════ -->
 <div id="v-app" hidden>
 <header>
@@ -277,7 +289,7 @@ async function api(o){
   if(!j.ok)throw new Error(j.error||'No se pudo conectar. Intenta de nuevo.');
   return j.data;
 }
-function vista(v){['v-cargando','v-entrada','v-confirmar','v-app','tabs'].forEach(id=>$(id).hidden=!(id===v||(v==='v-app'&&id==='tabs'&&!(D&&D.sin_cuenta))));}
+function vista(v){['v-cargando','v-entrada','v-confirmar','v-aviso','v-app','tabs'].forEach(id=>$(id).hidden=!(id===v||(v==='v-app'&&id==='tabs'&&!(D&&D.sin_cuenta))));}
 
 // ── Entrar ──────────────────────────────────────────────
 async function iniciar(){
@@ -304,6 +316,14 @@ async function cargar(){
     if(D.pase){mem.set('ypc_pase',D.pase);acceso.pase=D.pase;}
     delete acceso.fecha_nacimiento;
   }
+  delete acceso.acepto_aviso;
+  // Cuenta abierta por invitación: primero acepta el aviso y los términos
+  if(D.pedir_aviso){
+    $('aviso-lema').textContent=D.menor
+      ?'Para usar la cuenta de '+D.apodo+', su mamá, papá o tutor debe aceptar el aviso de privacidad y los términos.'
+      :'Hola, '+D.apodo+'. Para usar tu Pink Club, lee y acepta el aviso de privacidad y los términos.';
+    D=null;vista('v-aviso');$('t-aviso').focus();return;
+  }
   pintar();vista('v-app');ir('puntos',false);
 }
 $('f-entrar').onsubmit=async e=>{
@@ -327,6 +347,15 @@ $('f-confirmar').onsubmit=async e=>{
   b.disabled=true;b.textContent='Entrando…';
   try{acceso.fecha_nacimiento=fn;await cargar();}
   catch(x){delete acceso.fecha_nacimiento;$('e-confirmar').textContent=x.message;}
+  finally{b.disabled=false;b.textContent='Entrar';}
+};
+$('f-aviso').onsubmit=async e=>{
+  e.preventDefault();
+  const b=$('b-aviso');$('e-aviso').textContent='';
+  if(!$('ok-aviso').checked){$('e-aviso').textContent='Para entrar debes marcar la casilla.';return;}
+  b.disabled=true;b.textContent='Entrando…';
+  try{acceso.acepto_aviso=true;await cargar();}
+  catch(x){delete acceso.acepto_aviso;$('e-aviso').textContent=x.message;}
   finally{b.disabled=false;b.textContent='Entrar';}
 };
 function salir(){mem.del('ypc_llave');mem.del('ypc_pase');mem.del('ypc_entrada');location.reload();}
